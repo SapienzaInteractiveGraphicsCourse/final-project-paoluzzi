@@ -190,7 +190,7 @@ const loader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderConfig({ type: 'js' });
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-gltf.setDRACOLoader(dracoLoader);
+loader.setDRACOLoader(dracoLoader);
 
 var wallsHitBox = [];
 var interactableHitBox = [];
