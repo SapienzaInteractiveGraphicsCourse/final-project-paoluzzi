@@ -716,8 +716,11 @@ function animate() {
 	requestAnimationFrame( animate );
 
   var lampRotation = 0.7 * Math.sin(lampTime * lampFrequency);
-  lamps[0].rotation.z = -0.4 + lampRotation;
-  lamps[1].rotation.z = -0.4 + lampRotation;
+  if(lamps[0]){
+    lamps[0].rotation.z = -0.4 + lampRotation;
+    lamps[1].rotation.z = -0.4 + lampRotation;
+  }
+
   targetObject.position.x =  0.4 + lampRotation;
 
 
