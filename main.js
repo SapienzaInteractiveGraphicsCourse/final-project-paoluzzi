@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'GLTFLoader';
+import { DRACOLoader } from 'DRACOLoader'
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
 
@@ -185,6 +186,11 @@ var thighRight;
 var shinRight;
 
 const loader = new GLTFLoader();
+
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderConfig({ type: 'js' });
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+gltf.setDRACOLoader(dracoLoader);
 
 var wallsHitBox = [];
 var interactableHitBox = [];
