@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'GLTFLoader';
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
 
