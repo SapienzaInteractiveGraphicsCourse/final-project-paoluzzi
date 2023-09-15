@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			html,body {
+                display:flex;
+                margin:0;
+                padding:0;
+                overflow: hidden; /* Hide scrollbars */
+                }
+
+			#hud {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				padding: 10px;
+				background-color: rgba(0, 0, 0, 0.5);
+				color: white;
+				font-size: 16px;
+				width: 100px;
+			}
+
+			#healthBar {
+				width: 100px;
+				height: 20px;
+				background-color: red;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div id="hud">
+			Health: <div id="healthBar"></div>
+		</div>
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+				"GLTFLoader": "https://unpkg.com/three@0.154.0/examples/jsm/loaders/GLTFLoader.js"
+			  }
+			}
+		</script>
+		<script type="module" src="/main.js"></script>
+	</body>
+</html>
