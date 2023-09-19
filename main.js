@@ -315,13 +315,34 @@ const boxDepth = 2.22; // Adjust the depth as needed
 const boxPosition = new THREE.Vector3(-5.3, 0.0, 7.4); // Set the x, y, and z coordinates as needed
 
 const blackBoxGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-const blackBoxMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 }); // Use black color (hex value) for the material
-const blackBoxMesh = new THREE.Mesh(blackBoxGeometry, blackBoxMaterial);
+
+const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d');
+canvas.width = 256;
+canvas.height = 256;
+const texture = new THREE.CanvasTexture(canvas);
+material.map = texture;
+
+const blackBoxMesh = new THREE.Mesh(blackBoxGeometry, material);
 
 blackBoxMesh.position.copy(boxPosition);
 
 scene.add(blackBoxMesh);
 
+let textY = 0;
+function updateTexture() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'green';
+    context.font = '24px Arial';
+    context.fillText('Your scrolling text here', 10, textY);
+    texture.needsUpdate = true;
+
+    textY += 2; // Adjust the scrolling speed as needed
+
+    if (textY > canvas.height) {
+        textY = 0;
+    }
+}
 
 var exclamation;
 var guyInitialPosition = new THREE.Vector3(0.0, 0.075, -2.0);
@@ -720,7 +741,7 @@ function checkSpotlight(spotlight0, underTheLight){
 }
 function animate() {
 	requestAnimationFrame( animate );
-
+  updateTexture();
   var lampRotation = 0.7 * Math.sin(lampTime * lampFrequency);
   if(lamps[0]){
     lamps[0].rotation.z = -0.4 + lampRotation;
