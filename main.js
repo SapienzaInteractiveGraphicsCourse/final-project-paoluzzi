@@ -315,15 +315,24 @@ const boxDepth = 2.22; // Adjust the depth as needed
 const boxPosition = new THREE.Vector3(-5.3, 0.0, 7.4); // Set the x, y, and z coordinates as needed
 
 const blackBoxGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+const blackBoxMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
 const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
 canvas.width = 256;
 canvas.height = 256;
-const texture = new THREE.CanvasTexture(canvas);
-material.map = texture;
 
-const blackBoxMesh = new THREE.Mesh(blackBoxGeometry, material);
+const context = canvas.getContext('2d');
+context.beginPath();
+context.arc(canvas.width / 2, canvas.height / 2, 100, 0, Math.PI * 2);
+context.closePath();
+context.fillStyle = 'black'; // Fill the circle with black (opaque)
+context.fill();
+
+
+const texture = new THREE.CanvasTexture(canvas);
+blackBoxMaterial.map = texture;
+
+const blackBoxMesh = new THREE.Mesh(blackBoxGeometry, blackBoxMaterial);
 
 blackBoxMesh.position.copy(boxPosition);
 
