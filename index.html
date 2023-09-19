@@ -2,7 +2,7 @@
 <html>
 	<head lang="en">
 		<meta charset="utf-8">
-		<title>My first three.js app</title>
+		<title>eScape</title>
 		<style>
 			html,body {
                 display:flex;
@@ -27,12 +27,57 @@
 				height: 20px;
 				background-color: red;
 			}
+
+			#exitClue {
+				position: absolute;
+				top: 70%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				text-align: center;
+				background-color: rgba(0, 0, 0, 0.5);
+				color: white;
+				font-size: 32px;
+			}
+
+			#menu {
+				position: absolute;
+				top: 70%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				text-align: center;
+			}
+
+			#menu button{
+				padding: 25px 30px;
+				margin: 20px;
+				background-color: #050801;
+				color: #22ff00;
+				font-size: 20px;
+				font-weight: bold;
+				border: none;
+				border-radius: 5px;
+				letter-spacing: 4px;
+				overflow: hidden;
+				transition: 0.5s;
+				cursor: pointer;
+			}
+
+			#menu button:hover{
+				background: #419616;
+				color: #050801;
+			}
 		</style>
 	</head>
 	<body>
 
-		<div id="hud">
+		<div id="hud" style="display: none;">
 			Health: <div id="healthBar"></div>
+		</div>
+		<div id="menu">
+			<button id="startButton">Start Game</button>
+		</div>
+		<div id="exitClue" style="display: none;">
+			Press E to escape!
 		</div>
 		<script type="importmap">
 			{

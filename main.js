@@ -4,6 +4,15 @@ import { DRACOLoader } from 'DRACOLoader'
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
 
+
+
+const startButton = document.getElementById("startButton");
+startButton.addEventListener("click", startGame);
+
+const menu = document.getElementById("menu");
+const hud = document.getElementById("hud");
+const exitClue = document.getElementById("exitClue");
+
 /***************************
  * CAMERA
 ***************************/
@@ -210,10 +219,11 @@ function addInteractable(position, size){
   return boundingBox;
 }
 
+var alley;
 loader.load( './models/environment_ally/untitled.gltf', function ( gltf ) {
 
-  var alley =  gltf.scene;
-
+  alley =  gltf.scene;
+  alley.visible = false;
   alley.traverse(function (child) {
     if (child.isMesh) {
       child.receiveShadow = true;
@@ -279,6 +289,7 @@ var table;
 loader.load( './models/stylized_rusty_car/scene.gltf', function ( gltf ) {
 
   table = gltf.scene;
+  table.visible = false;
   table.scale.set(0.0035, 0.0035, 0.0035);
   table.position.set(-0.1, 0.18, 3.0);
 	scene.add(table);
@@ -309,59 +320,66 @@ loader.load( './models/stylized_rusty_car/scene.gltf', function ( gltf ) {
 
 } );
 
-const boxWidth = 1; // Adjust the width as needed
+const boxWidth = 1.05; // Adjust the width as needed
 const boxHeight = 2.52; // Adjust the height as needed
 const boxDepth = 2.22; // Adjust the depth as needed
-const boxPosition = new THREE.Vector3(-5.3, 0.0, 7.4); // Set the x, y, and z coordinates as needed
+const boxPosition = new THREE.Vector3(-5.3, 0.0, 7.44); // Set the x, y, and z coordinates as needed
 
 const blackBoxGeometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-const materials = [
-    new THREE.MeshBasicMaterial({ map: createCircularTexture() }),
-    new THREE.MeshBasicMaterial({ map: createCircularTexture() }),
-    new THREE.MeshBasicMaterial({ map: createCircularTexture() }),
-    new THREE.MeshBasicMaterial({ map: createCircularTexture() }),
-    new THREE.MeshBasicMaterial({ map: createCircularTexture() }),
-    new THREE.MeshBasicMaterial({ map: createCircularTexture() })
-];
+const textureLoader = new THREE.TextureLoader();
+const textTexture = textureLoader.load('./models/matrix.png'); // Load your text texture
 
-const blackBoxMesh = new THREE.Mesh(blackBoxGeometry, materials);
+// Create a shader material for the cube face
+const material = createMatrixShaderMaterial(textTexture);
 
+const blackBoxMesh = new THREE.Mesh(blackBoxGeometry, material);
 blackBoxMesh.position.copy(boxPosition);
 
-function createCircularTexture() {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.width = 256;
-    canvas.height = 256;
-
-    // Set up the circle as the mask
-    context.beginPath();
-    context.arc(canvas.width / 2, canvas.height / 2, 100, 0, Math.PI * 2);
-    context.closePath();
-    context.fillStyle = 'black'; // Fill the circle with black (opaque)
-    context.fill();
-
-    // Return the canvas as a texture
-    return new THREE.CanvasTexture(canvas);
+// Function to create a shader material with Matrix-like scrolling text
+function createMatrixShaderMaterial(texture) {
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+        time: { value: 0.0 },
+        textTexture: { value: textTexture } // Make sure 'textTexture' is defined and loaded properly
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float time;
+        uniform sampler2D textTexture; // Correctly reference the 'textTexture' uniform
+        varying vec2 vUv;
+        void main() {
+            float speed = 1.0; // Adjust the speed of the scrolling
+            float scroll = mod(vUv.y - time * speed, 0.5);
+            gl_FragColor = texture2D(textTexture, vec2(vUv.x, scroll)); // Use the text texture
+        }
+    `,
+    side: THREE.DoubleSide
+  });
+  return material;
 }
 
 scene.add(blackBoxMesh);
 
-let textY = 0;
-function updateTexture() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = 'green';
-    context.font = '24px Arial';
-    context.fillText('Your scrolling text here', 10, textY);
-    texture.needsUpdate = true;
+const exitBoundingBox  = new THREE.Box3().setFromObject(blackBoxMesh);
 
-    textY += 2; // Adjust the scrolling speed as needed
+const offsetX = 1.0;
+const offsetY = 0.0; 
+const offsetZ = 0.0; 
 
-    if (textY > canvas.height) {
-        textY = 0;
-    }
-}
+// Move the bounding box by applying the offset to its min and max points
+exitBoundingBox.min.add(new THREE.Vector3(offsetX, offsetY, offsetZ));
+exitBoundingBox.max.add(new THREE.Vector3(offsetX, offsetY, offsetZ));
+
+const wireframeGeometry = new THREE.Box3Helper(exitBoundingBox, 0xff0000); // Use a red color for visualization
+wireframeGeometries.push(wireframeGeometry);
+
 
 var exclamation;
 var guyInitialPosition = new THREE.Vector3(0.0, 0.075, -2.0);
@@ -383,6 +401,7 @@ loader.load( './models/exclamation_mark_3d_icon/scene.gltf', function ( gltf ) {
 loader.load( './models/bad_guy/untitled.gltf', function ( gltf ) {
 
   guy = gltf.scene;
+  guy.visible = false;
   guy.position.y = -2;
   guy.scale.set(0.4, 0.4, 0.4);
   guy.position.set(guyInitialPosition.x, guyInitialPosition.y, guyInitialPosition.z);
@@ -436,6 +455,7 @@ var downMovement = false;
 var leftCamera = false;
 var rightCamera = false;
 var hidden = false;
+var interaction = false;
 
 document.addEventListener('keydown', onKeyDown);
 document.addEventListener('keyup', onKeyUp);
@@ -463,6 +483,9 @@ function onKeyDown(event) {
       case 'ShiftLeft':
         hidden = true;
         break;
+      case 'KeyE':
+        interaction = true;
+        break;
     }
 }
   
@@ -489,6 +512,9 @@ function onKeyUp(event) {
       case 'ShiftLeft':
         hidden = false;
         break;
+      case 'KeyE':
+        interaction = false;
+      break;
     }
 }
   
@@ -529,6 +555,14 @@ function checkCollision(movementVector) {
   } else{
     const angleOffset = calculateAngleBetweenCharacterAndCamera(guy.position, camera.position);
     cameraAngle += angleOffset * 0.5 % (Math.PI * 2);
+  }
+
+  if(characterBoundingBox.intersectsBox(exitBoundingBox)){
+    exitClue.style.display = 'block';
+    if(interaction)
+      endGame();
+  } else {
+    exitClue.style.display = 'none';
   }
 }
 
@@ -758,46 +792,74 @@ function checkSpotlight(spotlight0, underTheLight){
   }
   return underTheLight && !interacting;
 }
+
+var inGame = false;
+function startGame(){
+  menu.style.display = 'none';
+  hud.style.display = 'block';
+  resetPositions();
+  guy.visible = true;
+  table.visible = true;
+  alley.visible = true;
+  inGame = true;
+}
+
+function endGame() {
+  menu.style.display = 'block';
+  hud.style.display = 'none';
+  exitClue.style.display = 'none';
+  resetPositions();
+  guy.visible = false;
+  table.visible = false;
+  alley.visible = false;
+  inGame = false; 
+}
+
 function animate() {
 	requestAnimationFrame( animate );
-  updateTexture();
-  var lampRotation = 0.7 * Math.sin(lampTime * lampFrequency);
-  if(lamps[0]){
-    lamps[0].rotation.z = -0.4 + lampRotation;
-    lamps[1].rotation.z = -0.4 + lampRotation;
+  if(inGame){
+    var lampRotation = 0.7 * Math.sin(lampTime * lampFrequency);
+    if(lamps[0]){
+      lamps[0].rotation.z = -0.4 + lampRotation;
+      lamps[1].rotation.z = -0.4 + lampRotation;
+    }
+  
+    targetObject.position.x =  0.4 + lampRotation;
+  
+  
+    lampTime += 0.01;
+    //controls.update();
+    moveCharacter();
+    if(movement)
+      if(hidden)
+        crouch();
+      else
+        walk();
+    else
+      if(hidden)
+        crouchIdle();
+      else
+        idle();
+        // Check if character is under the spotlight
+  
+        let underTheLight = false;
+    spotlights.forEach((spot) => {
+      underTheLight = checkSpotlight(spot, underTheLight);
+    });
+  
+    if(underTheLight) {
+      exclamation.visible = true;
+      characterHealth -= 1;
+      updateHealthBar();
+      if(characterHealth == 0)
+        resetPositions();
+    } else
+      exclamation.visible = false;
+    
+    const elapsedTime = performance.now() * 0.001;
+    material.uniforms.time.value = elapsedTime;
   }
 
-  targetObject.position.x =  0.4 + lampRotation;
-
-
-  lampTime += 0.01;
-  //controls.update();
-  moveCharacter();
-  if(movement)
-    if(hidden)
-      crouch();
-    else
-      walk();
-  else
-    if(hidden)
-      crouchIdle();
-    else
-      idle();
-      // Check if character is under the spotlight
-
-      let underTheLight = false;
-  spotlights.forEach((spot) => {
-    underTheLight = checkSpotlight(spot, underTheLight);
-  });
-
-  if(underTheLight) {
-    exclamation.visible = true;
-    characterHealth -= 1;
-    updateHealthBar();
-    if(characterHealth == 0)
-      resetPositions();
-  } else
-    exclamation.visible = false;
 	renderer.render( scene, camera );
 }
 
