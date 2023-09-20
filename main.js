@@ -9,9 +9,30 @@ const renderer = new THREE.WebGLRenderer();
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", startGame);
 
+const instructionButton = document.getElementById("instructionButton");
+instructionButton.addEventListener("click", showInstruction);
+
+const exitInstructions = document.getElementById("exitInstructions");
+exitInstructions.addEventListener("click", instructionToMenu)
+
+const restartButton = document.getElementById("restartButton");
+restartButton.addEventListener("click", startGame);
+
+const exitButton = document.getElementById("exitButton");
+exitButton.addEventListener("click", endGame);
+
+const restartWinButton = document.getElementById("restartWinButton");
+restartWinButton.addEventListener("click", startGame);
+
+const exitWinButton = document.getElementById("exitWinButton");
+exitWinButton.addEventListener("click", endGame);
+
 const menu = document.getElementById("menu");
 const hud = document.getElementById("hud");
 const exitClue = document.getElementById("exitClue");
+const instructions = document.getElementById("instructions")
+const lostGame = document.getElementById("lostGame");
+const winGame = document.getElementById("winGame");
 
 /***************************
  * CAMERA
@@ -28,6 +49,9 @@ camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight,
 
 const cameraHitboxSize = new THREE.Vector3(0.5, 0.5, 0.5); // Adjust this size as needed
 const cameraHitbox = new THREE.Box3();
+
+camera.position.set(-98.0, 1.0, 1.0);
+camera.lookAt(-98.0, 1.0, 0.0);
 
 window.addEventListener('resize', resizeCanvas);
 
@@ -201,6 +225,48 @@ dracoLoader.setDecoderConfig({ type: 'js' });
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
 loader.setDRACOLoader(dracoLoader);
 
+/******************
+ * MAIN MENU
+ *****************/
+
+const spotlightMenu = new THREE.SpotLight(spotlightColor, spotlightIntensity);
+scene.add(spotlightMenu);
+
+const spotlightMenuPosition = new THREE.Vector3(-99.0, 1.0, 3.0); // Set the position of the spotlight
+
+spotlightMenu.position.copy(spotlightMenuPosition);
+
+spotlightMenu.angle = spotlightAngle;
+spotlightMenu.penumbra = spotlightPenumbra;
+
+spotlightMenu.castShadow = true;
+
+const targetObjectMenu = new THREE.Object3D(); 
+targetObjectMenu.position.set(-99.0, 1.0, 0.0);
+scene.add(targetObjectMenu);
+
+spotlightMenu.target = targetObjectMenu;
+
+var menuWall;
+loader.load('./models/low-poly_brick_wall/scene.gltf', function (gltf) {
+  menuWall = gltf.scene;
+  menuWall.position.set(-100.0, 0.0, 0.0);
+  menuWall.visible = true;
+  menuWall.traverse(function (child) {
+    if (child.isMesh) {
+      child.receiveShadow = true;
+      child.castShadow = true;
+    }
+  });
+  scene.add(menuWall);
+}, undefined, function ( error ) {
+
+	console.error( error );
+
+});
+
+
+
 var wallsHitBox = [];
 var interactableHitBox = [];
 var lamps = [];
@@ -272,11 +338,11 @@ loader.load( './models/environment_ally/untitled.gltf', function ( gltf ) {
     const wireframeGeometry = new THREE.Box3Helper(boundingBox, 0xff0000); // Use a red color for visualization
     wireframeGeometries.push(wireframeGeometry);
   });
-
+/*
   wireframeGeometries.forEach((wireframeGeometry) => {
     scene.add(wireframeGeometry);
   });
-
+*/
 	scene.add(alley);
 
 }, undefined, function ( error ) {
@@ -308,12 +374,12 @@ loader.load( './models/stylized_rusty_car/scene.gltf', function ( gltf ) {
   const wireframeGeometry2 = new THREE.Box3Helper(bound, 0xff0000); // Use a red color for visualization
   wireframeGeometries.push(wireframeGeometry2);
 
-  scene.add(wireframeGeometry2);
+  //scene.add(wireframeGeometry2);
 
   const wireframeGeometry3 = new THREE.Box3Helper(bound2, 0xff0000); // Use a red color for visualization
   wireframeGeometries.push(wireframeGeometry3);
 
-  scene.add(wireframeGeometry3);
+  //scene.add(wireframeGeometry3);
 }, undefined, function ( error ) {
 
 	console.error( error );
@@ -521,6 +587,7 @@ function onKeyUp(event) {
 let targetCharacterRotation = 0;
 let currentCharacterRotation = 0;
 
+var winning = false;
 function checkCollision(movementVector) {
 
   var charBound = false;
@@ -549,6 +616,7 @@ function checkCollision(movementVector) {
   });
 
   if(!charBound) exclamation.position.add(movementVector);
+
   if(!cameraBound){
     camera.position.set(newPos.x, newPos.y, newPos.z);
     cameraHitbox.setFromCenterAndSize(camera.position, cameraHitboxSize);
@@ -559,8 +627,12 @@ function checkCollision(movementVector) {
 
   if(characterBoundingBox.intersectsBox(exitBoundingBox)){
     exitClue.style.display = 'block';
-    if(interaction)
-      endGame();
+    if(interaction){
+      exitClue.style.display = 'none';   
+      guy.visible = false;  
+      winning = true; 
+    }
+
   } else {
     exitClue.style.display = 'none';
   }
@@ -622,6 +694,32 @@ function moveCharacter() {
   camera.lookAt(lookAtPosition);
 }
 
+function lost(){
+  const initialCameraPosition = blackBoxMesh.position.clone().add(new THREE.Vector3(1.0, 0.5, 0));
+  const cameraLookAtPosition = blackBoxMesh.position.clone().add(new THREE.Vector3(0.0, 0.5, 0));;
+  cameraAngle = Math.PI * 3/2;
+  camera.position.copy(initialCameraPosition);
+  camera.lookAt(cameraLookAtPosition);
+  cameraHitbox.setFromCenterAndSize(camera.position, cameraHitboxSize);
+  inGame = false;
+  hud.style.display = 'none';
+  lostGame.style.display = 'block';
+  exclamation.visible = false;
+}
+
+function win(){
+  winning = false;
+  const initialCameraPosition = blackBoxMesh.position.clone().add(new THREE.Vector3(1.0, 0.5, 0));
+  const cameraLookAtPosition = blackBoxMesh.position.clone().add(new THREE.Vector3(0.0, 0.5, 0));;
+  cameraAngle = Math.PI * 3/2;
+  camera.position.copy(initialCameraPosition);
+  camera.lookAt(cameraLookAtPosition);
+  cameraHitbox.setFromCenterAndSize(camera.position, cameraHitboxSize);
+  inGame = false;
+  hud.style.display = 'none';
+  winGame.style.display = 'block';
+  exclamation.visible = false;
+}
 
 function resetPositions() {
   // Reset character position
@@ -797,9 +895,14 @@ var inGame = false;
 function startGame(){
   menu.style.display = 'none';
   hud.style.display = 'block';
-  resetPositions();
+  lostGame.style.display = 'none';
+  winGame.style.display = 'none';
+  while(!guy){}
   guy.visible = true;
+  resetPositions();
+  while(!table){}
   table.visible = true;
+  while(!alley){}
   alley.visible = true;
   inGame = true;
 }
@@ -808,11 +911,40 @@ function endGame() {
   menu.style.display = 'block';
   hud.style.display = 'none';
   exitClue.style.display = 'none';
-  resetPositions();
+  lostGame.style.display = 'none';
+  winGame.style.display = 'none';
   guy.visible = false;
   table.visible = false;
   alley.visible = false;
   inGame = false; 
+  exclamation.visible = false;
+
+  const initialCameraMenuPosition = menuWall.position.clone().add(new THREE.Vector3(2.0, 1.0, 1.0));
+  const cameraLookAtMenuPosition = menuWall.position.clone().add(new THREE.Vector3(2.0, 1.0, 0));
+  cameraAngle = Math.PI * 3/2;
+  camera.position.copy(initialCameraMenuPosition);
+  camera.lookAt(cameraLookAtMenuPosition);
+  cameraHitbox.setFromCenterAndSize(camera.position, cameraHitboxSize);
+}
+
+function showInstruction(){
+  menu.style.display = 'none';
+  hud.style.display = 'none';
+  exitClue.style.display = 'none';
+  instructions.style.display = 'block';
+  lostGame.style.display = 'none';
+  winGame.style.display = 'none';
+  guy.visible = false;
+  table.visible = false;
+  alley.visible = false;
+  inGame = false; 
+}
+
+function instructionToMenu(){
+  menu.style.display = 'block';
+  instructions.style.display = 'none';
+  lostGame.style.display = 'none';
+  winGame.style.display = 'none';
 }
 
 function animate() {
@@ -852,14 +984,17 @@ function animate() {
       characterHealth -= 1;
       updateHealthBar();
       if(characterHealth == 0)
-        resetPositions();
+        lost();
     } else
       exclamation.visible = false;
-    
-    const elapsedTime = performance.now() * 0.001;
-    material.uniforms.time.value = elapsedTime;
+    console.log("menuWall Position:", menuWall.position);
+    console.log("menuWall Visibility:", menuWall.visible);
   }
+  const elapsedTime = performance.now() * 0.001;
+  material.uniforms.time.value = elapsedTime;
 
+  if(winning)
+    win();
 	renderer.render( scene, camera );
 }
 

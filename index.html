@@ -2,6 +2,7 @@
 <html>
 	<head lang="en">
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>eScape</title>
 		<style>
 			html,body {
@@ -9,7 +10,7 @@
                 margin:0;
                 padding:0;
                 overflow: hidden; /* Hide scrollbars */
-                }
+            }
 
 			#hud {
 				position: absolute;
@@ -47,7 +48,7 @@
 				text-align: center;
 			}
 
-			#menu button{
+			button{
 				padding: 25px 30px;
 				margin: 20px;
 				background-color: #050801;
@@ -62,10 +63,113 @@
 				cursor: pointer;
 			}
 
-			#menu button:hover{
+			button:hover{
 				background: #419616;
 				color: #050801;
 			}
+
+			/* Style for the container div */
+			#instructions {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+			}
+
+			/* Style for the table */
+			table {
+				width: 80%; /* Adjust the width as needed */
+				border-collapse: collapse; /* Remove cell spacing */
+				margin: 0 auto; /* Center the table horizontally */
+			}
+
+			/* Style for table cells */
+			td {
+				text-align: center;
+				padding: 20px;
+				border: 0px; /* Add cell borders for separation */
+			}
+
+			/* Style for images */
+			.image-box img {
+				width: 20vw; /* Set the width of the images */
+				height: 20vw; /* Set the height of the images */
+				display: block;
+				margin: 0 auto; /* Center the image horizontally */
+			}
+
+			/* Style for text */
+			.image-box p {
+				margin: 5px 0;
+				color: #22ff00;
+			}
+
+			/* Style for the button */
+			#exitInstructions {
+				display: block; /* Make the button a block element to center it */
+				margin: 20px auto; /* Center the button horizontally */
+				padding: 15px 30px;
+				background-color: #050801;
+				color: #22ff00;
+				font-size: 20px;
+				font-weight: bold;
+				border: none;
+				border-radius: 5px;
+				letter-spacing: 4px;
+				overflow: hidden;
+				transition: 0.5s;
+				cursor: pointer;
+			}
+
+			#exitInstructions:hover {
+				background: #419616;
+				color: #050801;
+			}
+
+			/* Style for the container div holding the table and button */
+			#instructionContainer {
+				text-align: center;
+			}
+
+			
+			#lostGame {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 100vw;
+				height: 100vh;
+				transform: translate(-50%, -50%);
+				text-align: center;
+				background-color: rgba(0, 0, 0, 0.5);
+				color:#22ff00;
+				font-size: 16px;
+			}
+
+			#lostMenu {
+				padding-top: 20%;
+				font-size: 32px;
+				color:#22ff00;
+			}
+
+			#winGame {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 100vw;
+				height: 100vh;
+				transform: translate(-50%, -50%);
+				text-align: center;
+				background-color: rgba(0, 0, 0, 0.5);
+				color:#22ff00;
+				font-size: 16px;
+			}
+
+			#winMenu {
+				padding-top: 20%;
+				font-size: 32px;
+				color:#22ff00;
+			}
+			
 		</style>
 	</head>
 	<body>
@@ -75,9 +179,47 @@
 		</div>
 		<div id="menu">
 			<button id="startButton">Start Game</button>
+			<button id="instructionButton">Instructions</button>
 		</div>
 		<div id="exitClue" style="display: none;">
 			Press E to escape!
+		</div>
+		<div id="instructions" style="display: none;">
+			<div id="instructionContainer">
+				<table>
+					<tr>
+						<td class="image-box">
+							<img src="./models/Instruction2.png" alt="Escape the light">
+							<p>Beware of the light!<br>You can move the agent with WASD and the camera with LEFT and RIGHT ARROW!</p>
+						</td>
+						<td class="image-box">
+							<img src="./models/Instruction1.png" alt="Hide behind">
+							<p>Sometimes you'll have to hide!<br>The agent can crouch and hide with LEFT SHIFT!</p>
+						</td>
+						<td class="image-box">
+							<img src="./models/Instruction3.png" alt="Escape">
+							<p>Escape the simulation!<br>When the agent reaches the glitch, you can escape with E!</p>
+						</td>
+					</tr>
+				</table>
+				<button id="exitInstructions">Return to menu</button>
+			</div>
+		</div>
+
+		<div id="lostGame" style="display: none;">
+			<div id="lostMenu">
+				<p>You've been found!</p>
+				<button id="restartButton">Restart the Game</button>
+				<button id="exitButton">Exit the Game</button>
+			</div>
+		</div>
+
+		<div id="winGame" style="display: none;">
+			<div id="winMenu">
+				<p>You've escaped!</p>
+				<button id="restartWinButton">Restart the Game</button>
+				<button id="exitWinButton">Exit the Game</button>
+			</div>
 		</div>
 		<script type="importmap">
 			{
