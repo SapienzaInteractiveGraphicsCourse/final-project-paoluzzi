@@ -5,6 +5,7 @@ const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
 
 
+var firstStart = true;
 
 const startButton = document.getElementById("startButton");
 startButton.addEventListener("click", startGame);
@@ -33,6 +34,7 @@ const exitClue = document.getElementById("exitClue");
 const instructions = document.getElementById("instructions")
 const lostGame = document.getElementById("lostGame");
 const winGame = document.getElementById("winGame");
+const loading = document.getElementById("loading");
 
 /***************************
  * CAMERA
@@ -892,17 +894,27 @@ function checkSpotlight(spotlight0, underTheLight){
 }
 
 var inGame = false;
-function startGame(){
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function startGame(){
   menu.style.display = 'none';
-  hud.style.display = 'block';
   lostGame.style.display = 'none';
   winGame.style.display = 'none';
-  while(!guy){}
+  loading.style.display = 'block';
+  if(firstStart){
+    firstStart = false;
+    await sleep(2000);
+  }
+  loading.style.display = 'none';
+  hud.style.display = 'block';
+  while(!guy || !table || !alley){}
   guy.visible = true;
   resetPositions();
-  while(!table){}
+  //while(!table){}
   table.visible = true;
-  while(!alley){}
+  //while(!alley){}
   alley.visible = true;
   inGame = true;
 }
@@ -987,8 +999,6 @@ function animate() {
         lost();
     } else
       exclamation.visible = false;
-    console.log("menuWall Position:", menuWall.position);
-    console.log("menuWall Visibility:", menuWall.visible);
   }
   const elapsedTime = performance.now() * 0.001;
   material.uniforms.time.value = elapsedTime;
