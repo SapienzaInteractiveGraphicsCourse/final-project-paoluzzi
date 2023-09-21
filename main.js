@@ -903,7 +903,7 @@ async function startGame(){
   lostGame.style.display = 'none';
   winGame.style.display = 'none';
   loading.style.display = 'block';
-  if(firstStart){
+  while(!guy || !table || !alley){
     firstStart = false;
     await sleep(2000);
   }
