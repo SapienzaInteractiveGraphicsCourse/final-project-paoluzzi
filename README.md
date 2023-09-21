@@ -10,7 +10,7 @@ Fabrizio Paoluzzi 1743773
 
 # Game demo
 
-[Here] (https://sapienzainteractivegraphicscourse.github.io/final-project-paoluzzi/) you can play the demo
+[Here](https://sapienzainteractivegraphicscourse.github.io/final-project-paoluzzi/) you can play the demo
 
 # Commands
 
@@ -21,7 +21,7 @@ Fabrizio Paoluzzi 1743773
 
 # Resources
 
-- [Three.js] (https://threejs.org/)
-- [Blender] (https://www.blender.org/)
-- [Sketchfab] (https://sketchfab.com/feed)
-- [gltf.report] (https://gltf.report/)
+- [Three.js](https://threejs.org/)
+- [Blender](https://www.blender.org/)
+- [Sketchfab](https://sketchfab.com/feed)
+- [gltf.report](https://gltf.report/)
