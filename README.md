@@ -16,7 +16,7 @@ Fabrizio Paoluzzi 1743773
 
 - **_WASD_** : Move the agent
 - **_LEFT and RIGHT ARROWS_** : Move the camera
-- - **_LEFT SHIFT_**: Crouch
+- **_LEFT SHIFT_**: Crouch
 - **_E_**: Escape the simulation once you're close enough to the glitch
 
 # Resources
